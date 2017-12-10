@@ -12,7 +12,17 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+
+        let stringToSaveInCache = "Hello World!"
+        
+        let stringCache = TwoTierCache()
+        stringCache["newElement"] = stringToSaveInCache.data(using: .utf8)
+        
+        if let retrievedData = stringCache["newElement"] {
+            let retrievedString = String(data: retrievedData, encoding: String.Encoding.utf8)
+            print(retrievedString ?? "")
+        }
+        
     }
 
     override func didReceiveMemoryWarning() {
