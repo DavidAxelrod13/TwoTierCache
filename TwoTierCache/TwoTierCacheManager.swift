@@ -40,8 +40,8 @@ class TwoTierCache: TwoTierCacheManager {
             }
             return result
         }
-        set {
-            let data: NSData? = newValue as NSData?
+        set (newValueToSave){
+            let data: NSData? = newValueToSave as NSData?
             primaryCache.save(key: key, value: data)
             secondaryCache?.save(key: key, value: data)
         }
