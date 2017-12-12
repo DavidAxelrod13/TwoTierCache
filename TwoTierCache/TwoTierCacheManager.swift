@@ -28,6 +28,44 @@ class TwoTierCache: TwoTierCacheManager {
     
     var primaryCache: TwoTierCacheProvider = MemoryCache()
     var secondaryCache: TwoTierCacheProvider? = FileCache(cacheDirectory: "TwoTierCache")
+    var cacheExpiration: Double? {
+        didSet {
+            checkCaches()
+        }
+    }
+    
+    private func checkCaches() {
+        
+        let fileManager = FileManager.default
+        guard let expiryInSeconds = cacheExpiration else { return }
+        
+        guard let cacheDir = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
+        let twoTierCacheDir = cacheDir.appendingPathComponent("TwoTierCache")
+        let twoTierCacheDirPath = twoTierCacheDir.path
+        
+        let attrFile: Dictionary? = try? fileManager.attributesOfItem(atPath: twoTierCacheDirPath)
+        let createdAt = attrFile![FileAttributeKey.creationDate] as! Date
+        let timeSinceCreation = fabs( createdAt.timeIntervalSinceNow )
+        
+        print(twoTierCacheDirPath)
+        print( "file created at \(createdAt), \(timeSinceCreation) seconds ago" )
+        
+        if timeSinceCreation > expiryInSeconds {
+            clearCache()
+            print("Successfully cleared Cache with path: \(twoTierCacheDirPath)")
+        }
+
+    }
+    
+    convenience init(cacheExpiration: Double) {
+        self.init()
+        setCacheExpiration(cacheExpiration)
+    }
+    
+    private func setCacheExpiration(_ cacheExpiration: Double) {
+        self.cacheExpiration = cacheExpiration
+    }
+    
     
     subscript(key: String) -> Data? {
         get {
